@@ -1,6 +1,9 @@
 import { Graphics, Sprite, Point } from "pixi.js"
 
-const WATER_RADIUS = 5
+const WATER_RADIUS = 3
+const WATER_CLUSTER_NUM = 100
+const WATER_CLUSTER_RADIUS = 30
+const DYEING_SPEED = 10 // ひとつの drop から隣の drop に色がうつるまでの時間 [ms]
 const INK_RADIUS = 10
 
 export default class Game {
@@ -23,17 +26,19 @@ export default class Game {
         .beginFill(0xEEEEEE)
         .drawCircle(0, 0, WATER_RADIUS)
       drop.position = new Point(x, y)
-      drop.alpha = 0.5
+      drop.alpha = 0.3
       stage.addChild(drop)
       waterDrops.push(drop)
     }
 
     // 指定位置に water drop のかたまりを配置する
-    function addWaterDrop(x, y, r = 20) {
-      for (let i = 0; i < 10; i++) {
+    function addWaterDrop(x, y, r = WATER_CLUSTER_RADIUS) {
+      for (let i = 0; i < WATER_CLUSTER_NUM; i++) {
+        const s = Math.random() * r / 2
+        const t = Math.random() * 2 * Math.PI
         addSingleWaterDrop(
-          x + Math.random() * r,
-          y + Math.random() * r)
+          x + s * Math.cos(t),
+          y + s * Math.sin(t))
       }
     }
 
@@ -70,7 +75,7 @@ export default class Game {
         .forEach(drop => {
           dyeDrop(drop)
           // 時間差で近くの drop を染める
-          setTimeout(() => dyeAt(drop.x, drop.y, WATER_RADIUS), 50)
+          setTimeout(() => dyeAt(drop.x, drop.y, WATER_RADIUS), DYEING_SPEED)
         })
     }
 
